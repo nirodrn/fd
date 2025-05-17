@@ -1,0 +1,12 @@
+{
+  "name": "foodie-app",
+  "version": "1.0.0",
+  "description": "Food Delivery Application",
+  "scripts": {
+    "start": "docker-compose up",
+    "start:build": "docker-compose up --build",
+    "stop": "docker-compose down",
+    "logs": "docker-compose logs -f",
+    "start:local": "./start-services.sh"
+  }
+}

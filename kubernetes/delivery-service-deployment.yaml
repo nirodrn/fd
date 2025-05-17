@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delivery-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: delivery-service
+  template:
+    metadata:
+      labels:
+        app: delivery-service
+    spec:
+      containers:
+        - name: delivery-service
+          image: delivery-service:latest
+          ports:
+            - containerPort: 4002
+          env:
+            - name: PORT
+              value: "4002"
+            - name: MONGODB_URL
+              value: "mongodb+srv://chaveen:IT22129376@foodappcluster.4l6ru.mongodb.net/DeliveryDB?retryWrites=true&w=majority&appName=FoodAppCluster"
+            - name: JWT_SECRET
+              value: "20020216"
+            - name: GOOGLE_MAPS_API_KEY
+              value: "AIzaSyBjfPL7jM79cojfosPceoF3InC0DlfnzUo"
+            - name: MAPBOX_API_KEY
+              value: "pk.eyJ1IjoibmlzaHNhbiIsImEiOiJjbWFxZGNsNmwwNXViMmtxcmJyZ3ZzdHdrIn0.57s0TOZQUsMoE0aHZV_UeQ"
+            - name: USER_SERVICE_URL
+              value: "http://user-management-service:8090"
+            - name: ORDER_SERVICE_URL
+              value: "http://order-service:5002"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: delivery-service
+spec:
+  selector:
+    app: delivery-service
+  ports:
+    - port: 4002
+      targetPort: 4002

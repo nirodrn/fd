@@ -1,0 +1,115 @@
+version: '3.8'
+
+networks:
+  foodie-net:
+    driver: bridge
+
+services:
+  user-management-service:
+    build: ./user-management-service
+    ports:
+      - "8090:8090"
+    networks:
+      - foodie-net
+    env_file:
+      - ./user-management-service/.env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  restaurant-service:
+    build: ./restaurant-service
+    ports:
+      - "5001:5001"
+    networks:
+      - foodie-net
+    env_file:
+      - ./restaurant-service/.env
+    depends_on:
+      user-management-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "5002:5002"
+    networks:
+      - foodie-net
+    env_file:
+      - ./order-service/.env
+    depends_on:
+      user-management-service:
+        condition: service_healthy
+      restaurant-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  payment-auth-service:
+    build: ./payment-auth-service
+    ports:
+      - "5004:5004"
+    networks:
+      - foodie-net
+    env_file:
+      - ./payment-auth-service/.env
+    depends_on:
+      order-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5004"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  delivery-service:
+    build: ./delivery-service
+    ports:
+      - "4002:4002"
+    networks:
+      - foodie-net
+    env_file:
+      - ./delivery-service/.env
+    depends_on:
+      user-management-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4002"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8000:8000"
+    networks:
+      - foodie-net
+    env_file:
+      - ./api-gateway/.env
+    depends_on:
+      user-management-service:
+        condition: service_healthy
+      restaurant-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+      payment-auth-service:
+        condition: service_healthy
+      delivery-service:
+        condition: service_healthy
+
+volumes:
+  mongo_data:

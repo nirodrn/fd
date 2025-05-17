@@ -1,0 +1,24 @@
+import mongoose from "mongoose";
+import config from "../configs/index.js";
+import logger from "./logger.js";
+
+let database;
+
+const connect = async() => {
+    const MONGODB_URL = config.DB_CONNECTION_STRING;
+
+    if (database) return;
+
+    mongoose
+    .connect(MONGODB_URL)
+    .then((connection) => {
+        database = connection;
+        logger.info("Delivery Database Synced");
+    })
+    .catch((err) => {
+        logger.error(err.message);
+        console.log(err);
+    });
+};
+
+export { connect };
